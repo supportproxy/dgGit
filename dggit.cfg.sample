@@ -12,7 +12,7 @@ Extension=.dg
 
 # 3. Clipboard Cleaning
 # Text to automatically remove from the start of the filename (e.g. "void ")
-PrefixToStrip=void 
+PrefixToStrip=void |string 
 
 # 4. User Interface
 # Show a popup message when a file is saved successfully? (true/false)

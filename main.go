@@ -7,7 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
-	"time" // Used for the safety pauses
+	"time" // Used for safety pauses during setup
 
 	"github.com/atotto/clipboard"
 	"github.com/gen2brain/dlgs"
@@ -31,7 +31,7 @@ type Config struct {
 	GitAutoCommit bool
 }
 
-// -- build --
+// -- MY NOTES --
 // go build -ldflags -H=windowsgui -o dgGit.exe
 
 func main() {
@@ -87,9 +87,18 @@ func main() {
 		return
 	}
 
+	// --- UPDATED: HANDLE MULTIPLE PREFIXES (SPLIT BY PIPE) ---
 	filenameRaw := firstLine
-	if cfg.PrefixToStrip != "" && strings.HasPrefix(firstLine, cfg.PrefixToStrip) {
-		filenameRaw = strings.TrimPrefix(firstLine, cfg.PrefixToStrip)
+	if cfg.PrefixToStrip != "" {
+		// Split config by pipe "|" to get all options
+		prefixes := strings.Split(cfg.PrefixToStrip, "|")
+		for _, p := range prefixes {
+			// Check if this specific prefix matches the start of the line
+			if p != "" && strings.HasPrefix(firstLine, p) {
+				filenameRaw = strings.TrimPrefix(firstLine, p)
+				break // Stop after finding the first match
+			}
+		}
 	}
 
 	safeFilename := sanitizeFilename(strings.TrimSpace(filenameRaw)) + cfg.Extension
@@ -164,6 +173,7 @@ func loadConfig() (Config, bool, bool) {
 		case "extension":
 			cfg.Extension = val
 		case "prefixtostrip":
+			// Allow reading the raw string including pipes
 			cfg.PrefixToStrip = strings.Trim(val, "\"")
 		case "showsuccessmessage":
 			cfg.ShowSuccess = (val == "true")
@@ -182,7 +192,6 @@ func runSetupWizard(configPath string) (Config, bool) {
 	// --- STEP 1 ---
 	dlgs.Info("Step 1 Instructions", "Next, please select the folder where you want your code saved.\n\nThe program will prompt for a save location every time and the filebrowser will start in this folder by default, so it's good to set it to your repo or a parent folder of your repo (you can change this later by editing the config file or deleting the config file and re-running the setup wizard).\n\nIf you want to use the right-click menu on a specific folder, it doesn't matter what you choose here because it will save the code from your clipboard in the folder you right-clicked on instead.")
 
-	// INCREASED SLEEP: 500ms ensures the previous window is fully closed
 	time.Sleep(500 * time.Millisecond)
 
 	startDir, err := dialog.Directory().Title("Step 1: Select a folder in which to save the code copied to your clipboard (local repo?)").Browse()
@@ -202,12 +211,12 @@ func runSetupWizard(configPath string) (Config, bool) {
 		return Config{}, true
 	}
 
-	// --- STEP 3 ---
+	// --- STEP 3 (UPDATED TEXT) ---
 	time.Sleep(500 * time.Millisecond)
-	dlgs.Info("Step 3 Instructions", "Next, enter the text to strip from the start of your copied code.\n\nThe program uses the first line of your clipboard code as the filename.\n\nFor example, if you copy 'void myFunction()', and set this to 'void ', the file will be named 'myFunction.dg'.")
+	dlgs.Info("Step 3 Instructions", "Next, enter the text to strip from the start of your copied code to create the filename.\n\nYou can enter multiple options separated by a pipe symbol (|).\n\nExample: 'void |int |string '\n(Note the space after each word if needed)")
 
 	time.Sleep(500 * time.Millisecond)
-	prefix, success, _ := dlgs.Entry("Step 3: Prefix Stripping", "Prefix to strip:", "void ")
+	prefix, success, _ := dlgs.Entry("Step 3: Prefix Stripping", "Prefixes (separate with | ):", "void |int |string ")
 	if !success {
 		dlgs.Warning(AppName, "Setup was cancelled.")
 		return Config{}, true
@@ -260,7 +269,9 @@ StartDir=%s
 Extension=%s
 
 # 3. Clipboard Cleaning
-# Text to automatically remove from the start of the filename (e.g. "void ")
+# Text to automatically remove from the start of the filename.
+# You can separate multiple options with a pipe symbol "|".
+# Example: "void |int |string "
 PrefixToStrip=%s
 
 # 4. User Interface
@@ -312,6 +323,7 @@ func runGitCommit(dir, filename string) error {
 	}
 
 	msg := fmt.Sprintf("Auto-save: %s (via dgGit)", filename)
+
 	cmdCommit := exec.Command("git", "commit", "-m", msg)
 	cmdCommit.Dir = dir
 	if out, err := cmdCommit.CombinedOutput(); err != nil {
