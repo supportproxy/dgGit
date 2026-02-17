@@ -1,0 +1,28 @@
+# dgGit Configuration File Sampe
+
+## NOTE -- this file is created when running dgGit.exe the first time and can be recreated by deleting it and re-running dgGit.exe
+
+# 1. Default Save Directory
+# The folder where files will save (unless you right-click a specific folder).
+StartDir=C:\mycode\ZohoCRM\project1
+
+# 2. File Extension
+# The extension appended to saved files (e.g. .dg, .txt, .js)
+Extension=.dg
+
+# 3. Clipboard Cleaning
+# Text to automatically remove from the start of the filename (e.g. "void ")
+PrefixToStrip=void 
+
+# 4. User Interface
+# Show a popup message when a file is saved successfully? (true/false)
+ShowSuccessMessage=true
+
+# 5. Automation
+# Save immediately to StartDir without showing the folder browser? (true/false)
+AutoSave=false
+
+# 6. Version Control
+# Automatically run 'git add' and 'git commit' after saving? (true/false)
+# Note: Git must be installed and the target folder must be a git repo.
+GitAutoCommit=true
