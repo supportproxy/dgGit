@@ -1,1 +1,3 @@
 dgGit is a Windows utility designed to bridge the gap between Zoho CRM’s Deluge editor and local version control. Since Zoho lacks native Git integration or bulk export for custom functions, this tool allows you to instantly save clipboard code to a local repository via the right-click menu—automatically handling file naming and Git commits. While built for Zoho developers, it works as a universal "Clipboard-to-File" tool for any text-based workflow.
+
+The executable is functional as is, so if you just want to use/try it without compiling your own, just download dgGit.exe somewhere you want to run it from and run it :)
