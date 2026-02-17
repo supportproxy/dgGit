@@ -3,4 +3,3 @@ dgGit is a Windows utility designed to bridge the gap between Zoho CRM’s Delug
 The executable is functional as is, so if you just want to use/try it without compiling your own, just download dgGit.exe somewhere you want to run it from and run it :)
 
 --
-
